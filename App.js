@@ -8,20 +8,36 @@ function randomString() {
 	return str;
 }
 
-// TWORZENIE NOWYCH EGZEMPLARZY KOLUMN
-var todoColumn = new Column('Do zrobienia');
-var doingColumn = new Column('W trakcie');
-var doneColumn = new Column('Skończone');
+var baseUrl = 'https://kodilla.com/pl/bootcamp-api';
+var myHeaders = {
+  'X-Client-Id': '1681',
+  'X-Auth-Token': 'cb98282ff52774acd7578614553b34ce'
+};
 
-// DODAWANIE KOLUMN DO TABLICY
-board.createColumn(todoColumn);
-board.createColumn(doingColumn);
-board.createColumn(doneColumn);
+$.ajaxSetup({
+	headers: myHeaders
+});
 
-// TWORZENIE NOWYCH EGZEMPLARZY KART
-var card1 = new Card('Nowe zadanie');
-var card2 = new Card('stworzyc tablice kanban');
 
-// DODAWANIE KART DO KOLUMN
-todoColumn.createCard(card1);
-doingColumn.createCard(card2);
+$.ajax({
+    url: baseUrl + '/board',
+    method: 'GET',
+    success: function(response) {
+      setupColumns(response.columns);
+    }
+});
+
+function setupColumns(columns) {
+    columns.forEach(function (column) {
+  		var col = new Column(column.id, column.name);
+        board.createColumn(col);
+        setupCards(col, column.cards);
+    });
+}
+
+function setupCards(col, cards) {
+	cards.forEach(function (card) {
+        var card = new Card(card.id, card.name, card.bootcamp_kanban_column_id);
+    	col.createCard(card);
+  	})
+}
